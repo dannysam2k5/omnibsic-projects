@@ -1,0 +1,1270 @@
+create or replace procedure z_insert_customer_dtn as 
+a number;
+sys_date date;
+maker_idd varchar2(50);
+checker_idd varchar2(50);
+in_source_code varchar2(100);
+begin
+--a:=aa;
+maker_idd:='MIG_USER01';
+checker_idd:='MIG_USER02';
+
+
+select today into  sys_date from sttm_dates where branch_code = '000';
+
+---XXX1
+dbms_output.put_line('---populating sttm_upload_customer : starting');
+for i in ( 
+select 
+trim(ACTION_CODE)  ACTION_CODE,         --1   ACTION_CODE
+trim(ADDRESS_LINE1)  ADDRESS_LINE1,         --2   ADDRESS_LINE1
+trim(ADDRESS_LINE2)  ADDRESS_LINE2,         --3   ADDRESS_LINE2
+trim(ADDRESS_LINE3)  ADDRESS_LINE3,         --4   ADDRESS_LINE3
+trim(ADDRESS_LINE4)  ADDRESS_LINE4,         --5   ADDRESS_LINE4
+trim(ALG_ID)  ALG_ID,         --6   ALG_ID
+trim(ALLOW_VRTL_ACCNTS)  ALLOW_VRTL_ACCNTS,         --7   ALLOW_VRTL_ACCNTS
+trim(AML_CUSTOMER_GRP)  AML_CUSTOMER_GRP,         --8   AML_CUSTOMER_GRP
+trim(AML_REQUIRED)  AML_REQUIRED,         --9   AML_REQUIRED
+trim(AR_AP_TRACKING)  AR_AP_TRACKING,         --10   AR_AP_TRACKING
+trim(AUTOGEN_STMTPLAN)  AUTOGEN_STMTPLAN,         --11   AUTOGEN_STMTPLAN
+trim(AUTO_CREATE_ACCOUNT)  AUTO_CREATE_ACCOUNT,         --12   AUTO_CREATE_ACCOUNT
+trim(AUTO_CUST_AC_NO)  AUTO_CUST_AC_NO,         --13   AUTO_CUST_AC_NO
+trim(BRANCH_CODE)  BRANCH_CODE,         --14   BRANCH_CODE
+trim(CAS_CUST)  CAS_CUST,         --15   CAS_CUST
+trim(CHARGE_GROUP)  CHARGE_GROUP,         --16   CHARGE_GROUP
+trim(to_date(CHECKER_DT_STAMP, 'DD-MM-RRRR'))  CHECKER_DT_STAMP,         --17   CHECKER_DT_STAMP
+trim(CHECKER_ID)  CHECKER_ID,         --18   CHECKER_ID
+trim(CHK_DIGIT_VALID_REQD)  CHK_DIGIT_VALID_REQD,         --19   CHK_DIGIT_VALID_REQD
+trim(CIF_CREATION_DATE)  CIF_CREATION_DATE,         --20   CIF_CREATION_DATE    trim(to_date('01-JAN-2000', 'DD-MM-RRRR'))  CIF_CREATION_DATE,     PROBLEMATIC
+trim(CIF_STATUS)  CIF_STATUS,         --21   CIF_STATUS
+trim(CIF_STATUS_SINCE)  CIF_STATUS_SINCE,         --22   CIF_STATUS_SINCE
+trim(CLS_CCY_ALLOWED)  CLS_CCY_ALLOWED,         --23   CLS_CCY_ALLOWED
+trim(CLS_PARTICIPANT)  CLS_PARTICIPANT,         --24   CLS_PARTICIPANT
+trim(CONSOL_TAX_CERT_REQD)  CONSOL_TAX_CERT_REQD,         --25   CONSOL_TAX_CERT_REQD
+trim(CONVERSION_STATUS_FLAG)  CONVERSION_STATUS_FLAG,         --26   CONVERSION_STATUS_FLAG
+trim(COUNTRY)  COUNTRY,         --27   COUNTRY
+trim(CREDIT_RATING)  CREDIT_RATING,         --28   CREDIT_RATING
+trim(CRM_CUSTOMER)  CRM_CUSTOMER,         --29   CRM_CUSTOMER
+trim(CRS_TYPE)  CRS_TYPE,         --30   CRS_TYPE
+trim(CUSTOMER_CATEGORY)  CUSTOMER_CATEGORY,         --31   CUSTOMER_CATEGORY
+trim(CUSTOMER_NAME1)  CUSTOMER_NAME1,         --32   CUSTOMER_NAME1
+trim(CUSTOMER_NO)  CUSTOMER_NO,         --33   CUSTOMER_NO
+trim(CUSTOMER_TYPE)  CUSTOMER_TYPE,         --34   CUSTOMER_TYPE
+trim(CUST_CLASSIFICATION)  CUST_CLASSIFICATION,         --35   CUST_CLASSIFICATION
+trim(CUST_CLG_GROUP)  CUST_CLG_GROUP,         --36   CUST_CLG_GROUP
+trim(CUST_UNADVISED)  CUST_UNADVISED,         --37   CUST_UNADVISED
+trim(DEBTOR_CATEGORY)  DEBTOR_CATEGORY,         --38   DEBTOR_CATEGORY
+trim(DECEASED)  DECEASED,         --39   DECEASED
+trim(DEFAULT_MEDIA)  DEFAULT_MEDIA,         --40   DEFAULT_MEDIA
+trim(ELCM_CUSTOMER)  ELCM_CUSTOMER,         --41   ELCM_CUSTOMER
+trim(ERR_MSG)  ERR_MSG,         --42   ERR_MSG
+trim(EXPOSURE_CATEGORY)  EXPOSURE_CATEGORY,         --43   EXPOSURE_CATEGORY
+trim(EXPOSURE_COUNTRY)  EXPOSURE_COUNTRY,         --44   EXPOSURE_COUNTRY
+trim(EXT_REF_NO)  EXT_REF_NO,         --45   EXT_REF_NO
+trim(FAX_NUMBER)  FAX_NUMBER,         --46   FAX_NUMBER
+trim(FREQUENCY)  FREQUENCY,         --47   FREQUENCY
+trim(FROZEN)  FROZEN,         --48   FROZEN
+trim(FT_ACCTING_AS_OF)  FT_ACCTING_AS_OF,         --49   FT_ACCTING_AS_OF
+trim(FULL_NAME)  FULL_NAME,         --50   FULL_NAME
+trim(FX_CLEAN_RISK_LIMIT)  FX_CLEAN_RISK_LIMIT,         --51   FX_CLEAN_RISK_LIMIT
+trim(FX_CUST_CLEAN_RISK_LIMIT)  FX_CUST_CLEAN_RISK_LIMIT,         --52   FX_CUST_CLEAN_RISK_LIMIT
+trim(FX_NETTING_CUSTOMER)  FX_NETTING_CUSTOMER,         --53   FX_NETTING_CUSTOMER
+trim(GENERATE_MT920)  GENERATE_MT920,         --54   GENERATE_MT920
+trim(GROUP_CODE)  GROUP_CODE,         --55   GROUP_CODE
+trim(HO_AC_NO)  HO_AC_NO,         --56   HO_AC_NO
+trim(INDIVIDUAL_TAX_CERT_REQD)  INDIVIDUAL_TAX_CERT_REQD,         --57   INDIVIDUAL_TAX_CERT_REQD
+trim(INTRODUCER)  INTRODUCER,         --58   INTRODUCER
+trim(INVEST_CUST)  INVEST_CUST,         --59   INVEST_CUST
+trim(ISSUER_CUSTOMER)  ISSUER_CUSTOMER,         --60   ISSUER_CUSTOMER
+trim(JOINT_VENTURE)  JOINT_VENTURE,         --61   JOINT_VENTURE
+null,         --62   KYC_DETAILS
+trim(KYC_REF_NO)  KYC_REF_NO,         --63   KYC_REF_NO
+trim(LANGUAGE)  LANGUAGE,         --64   LANGUAGE
+trim(LC_COLLATERAL_PCT)  LC_COLLATERAL_PCT,         --65   LC_COLLATERAL_PCT
+trim(LIABILITY_NO)  LIABILITY_NO,         --66   LIABILITY_NO
+trim(LIAB_BR)  LIAB_BR,         --67   LIAB_BR
+trim(LIAB_NODE)  LIAB_NODE,         --68   LIAB_NODE
+trim(LIAB_UNADVISED)  LIAB_UNADVISED,         --69   LIAB_UNADVISED
+trim(LIMIT_CCY)  LIMIT_CCY,         --70   LIMIT_CCY
+trim(LOCAL_BRANCH)  LOCAL_BRANCH,         --71   LOCAL_BRANCH
+trim(LOC_CODE)  LOC_CODE,         --72   LOC_CODE
+trim(MAILERS_REQUIRED)  MAILERS_REQUIRED,         --73   MAILERS_REQUIRED
+trim(MAINTENANCE_SEQ_NO)  MAINTENANCE_SEQ_NO,         --74   MAINTENANCE_SEQ_NO
+trim(to_date(MAKER_DT_STAMP, 'DD-MM-RRRR'))  MAKER_DT_STAMP,         --75   MAKER_DT_STAMP
+trim(MAKER_ID)  MAKER_ID,         --76   MAKER_ID
+trim(MFI_CUSTOMER)  MFI_CUSTOMER,         --77   MFI_CUSTOMER
+trim(NATIONALITY)  NATIONALITY,         --78   NATIONALITY
+trim(OVERALL_LIMIT)  OVERALL_LIMIT,         --79   OVERALL_LIMIT
+trim(PAST_DUE_FLAG)  PAST_DUE_FLAG,         --80   PAST_DUE_FLAG
+trim(PINCODE)  PINCODE,         --81   PINCODE
+trim(PRIVATE_CUSTOMER)  PRIVATE_CUSTOMER,         --82   PRIVATE_CUSTOMER
+trim(to_date(trim(REVISION_DATE), 'RRRR-MM-DD'))  REVISION_DATE,         --83   REVISION_DATE
+trim(RISK_CATEGORY)  RISK_CATEGORY,         --84   RISK_CATEGORY
+trim(RISK_PROFILE)  RISK_PROFILE,         --85   RISK_PROFILE
+trim(RM_ID)  RM_ID,         --86   RM_ID
+trim(RP_CUSTOMER)  RP_CUSTOMER,         --87   RP_CUSTOMER
+trim(SEC_CLEAN_RISK_LIMIT)  SEC_CLEAN_RISK_LIMIT,         --88   SEC_CLEAN_RISK_LIMIT
+trim(SEC_CUST_CLEAN_RISK_LIMIT)  SEC_CUST_CLEAN_RISK_LIMIT,         --89   SEC_CUST_CLEAN_RISK_LIMIT
+trim(SEC_CUST_PSTL_RISK_LIMIT)  SEC_CUST_PSTL_RISK_LIMIT,         --90   SEC_CUST_PSTL_RISK_LIMIT
+trim(SEC_PSTL_RISK_LIMIT)  SEC_PSTL_RISK_LIMIT,         --91   SEC_PSTL_RISK_LIMIT
+trim(SHORT_NAME)  SHORT_NAME,         --92   SHORT_NAME
+trim(SHORT_NAME2)  SHORT_NAME2,         --93   SHORT_NAME2
+trim(SOURCE_CODE)  SOURCE_CODE,         --94   SOURCE_CODE
+trim(MAINTENANCE_SEQ_NO)  SOURCE_SEQ_NO,         --95   SOURCE_SEQ_NO
+trim(SPECIAL_CUST)  SPECIAL_CUST,         --96   SPECIAL_CUST
+trim(SSN)  SSN,         --97   SSN
+trim(STAFF)  STAFF,         --98   STAFF
+trim(STMT_DAY)  STMT_DAY,         --99   STMT_DAY
+trim(SWIFT_CODE)  SWIFT_CODE,         --100   SWIFT_CODE
+trim(TAXID_NO)  TAXID_NO,         --101   TAXID_NO
+trim(TAX_CNTRY)  TAX_CNTRY,         --102   TAX_CNTRY
+trim(TAX_GROUP)  TAX_GROUP,         --103   TAX_GROUP
+'Y'  TRACK_LIMITS,         --104   TRACK_LIMITS
+trim(TREASURY_CUSTOMER)  TREASURY_CUSTOMER,         --105   TREASURY_CUSTOMER
+trim(UDF_1)  UDF_1,         --106   UDF_1
+trim(UDF_2)  UDF_2,         --107   UDF_2
+trim(UDF_3)  UDF_3,         --108   UDF_3
+trim(UDF_4)  UDF_4,         --109   UDF_4
+trim(UDF_5)  UDF_5,         --110   UDF_5
+trim(UNIQUE_ID_NAME)  UNIQUE_ID_NAME,         --111   UNIQUE_ID_NAME
+trim(UNIQUE_ID_VALUE)  UNIQUE_ID_VALUE,         --112   UNIQUE_ID_VALUE
+trim(UTILITY_PROVIDER)  UTILITY_PROVIDER,         --113   UTILITY_PROVIDER
+trim(UTILITY_PROVIDER_ID)  UTILITY_PROVIDER_ID,         --114   UTILITY_PROVIDER_ID
+trim(UTILITY_PROVIDER_TYPE)  UTILITY_PROVIDER_TYPE,         --115   UTILITY_PROVIDER_TYPE
+trim(VRTL_CUSTOMER_ID)  VRTL_CUSTOMER_ID,         --116   VRTL_CUSTOMER_ID
+trim(WHEREABOUTS_UNKNOWN)  WHEREABOUTS_UNKNOWN,         --117   WHEREABOUTS_UNKNOWN
+trim(WHT_PCT)  WHT_PCT,         --118   WHT_PCT
+trim(WITHHOLDING_TAX)  WITHHOLDING_TAX          --119   WITHHOLDING_TAX
+from  STTM_UPLOAD_CUSTOMER@to_dtn where trim(ext_ref_no) not in (select trim(a.ext_ref_no) from sttm_customer a where a.ext_ref_no is not null)
+--and branch_code not in ('102','603','601','605','102','000','103','104','401','105','106','107','201','604',
+--'606','118','114','402','701','119','116','112','117','113','115')
+
+/*
+select CIF_CREATION_DATE, REVISION_DATE from STTM_UPLOAD_CUSTOMER@to_dtn
+
+--desc STTM_UPLOAD_CUSTOMER@to_dtn
+and rownum < a
+*/
+
+)
+loop
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+begin
+
+insert into STTM_UPLOAD_CUSTOMER (
+ACTION_CODE,         --1   ACTION_CODE
+ADDRESS_LINE1,         --2   ADDRESS_LINE1
+ADDRESS_LINE2,         --3   ADDRESS_LINE2
+ADDRESS_LINE3,         --4   ADDRESS_LINE3
+ADDRESS_LINE4,         --5   ADDRESS_LINE4
+ALG_ID,         --6   ALG_ID
+ALLOW_VRTL_ACCNTS,         --7   ALLOW_VRTL_ACCNTS
+AML_CUSTOMER_GRP,         --8   AML_CUSTOMER_GRP
+AML_REQUIRED,         --9   AML_REQUIRED
+AR_AP_TRACKING,         --10   AR_AP_TRACKING
+AUTOGEN_STMTPLAN,         --11   AUTOGEN_STMTPLAN
+AUTO_CREATE_ACCOUNT,         --12   AUTO_CREATE_ACCOUNT
+AUTO_CUST_AC_NO,         --13   AUTO_CUST_AC_NO
+BRANCH_CODE,         --14   BRANCH_CODE
+CAS_CUST,         --15   CAS_CUST
+CHARGE_GROUP,         --16   CHARGE_GROUP
+CHECKER_DT_STAMP,         --17   CHECKER_DT_STAMP
+CHECKER_ID,         --18   CHECKER_ID
+CHK_DIGIT_VALID_REQD,         --19   CHK_DIGIT_VALID_REQD
+CIF_CREATION_DATE,         --20   CIF_CREATION_DATE     
+CIF_STATUS,         --21   CIF_STATUS
+CIF_STATUS_SINCE,         --22   CIF_STATUS_SINCE
+CLS_CCY_ALLOWED,         --23   CLS_CCY_ALLOWED
+CLS_PARTICIPANT,         --24   CLS_PARTICIPANT
+CONSOL_TAX_CERT_REQD,         --25   CONSOL_TAX_CERT_REQD
+CONVERSION_STATUS_FLAG,         --26   CONVERSION_STATUS_FLAG
+COUNTRY,         --27   COUNTRY
+CREDIT_RATING,         --28   CREDIT_RATING
+CRM_CUSTOMER,         --29   CRM_CUSTOMER
+CRS_TYPE,         --30   CRS_TYPE
+CUSTOMER_CATEGORY,         --31   CUSTOMER_CATEGORY
+CUSTOMER_NAME1,         --32   CUSTOMER_NAME1
+CUSTOMER_NO,         --33   CUSTOMER_NO
+CUSTOMER_TYPE,         --34   CUSTOMER_TYPE
+CUST_CLASSIFICATION,         --35   CUST_CLASSIFICATION
+CUST_CLG_GROUP,         --36   CUST_CLG_GROUP
+CUST_UNADVISED,         --37   CUST_UNADVISED
+DEBTOR_CATEGORY,         --38   DEBTOR_CATEGORY
+DECEASED,         --39   DECEASED
+DEFAULT_MEDIA,         --40   DEFAULT_MEDIA
+ELCM_CUSTOMER,         --41   ELCM_CUSTOMER
+ERR_MSG,         --42   ERR_MSG
+EXPOSURE_CATEGORY,         --43   EXPOSURE_CATEGORY
+EXPOSURE_COUNTRY,         --44   EXPOSURE_COUNTRY
+EXT_REF_NO,         --45   EXT_REF_NO
+FAX_NUMBER,         --46   FAX_NUMBER
+FREQUENCY,         --47   FREQUENCY
+FROZEN,         --48   FROZEN
+FT_ACCTING_AS_OF,         --49   FT_ACCTING_AS_OF
+FULL_NAME,         --50   FULL_NAME
+FX_CLEAN_RISK_LIMIT,         --51   FX_CLEAN_RISK_LIMIT
+FX_CUST_CLEAN_RISK_LIMIT,         --52   FX_CUST_CLEAN_RISK_LIMIT
+FX_NETTING_CUSTOMER,         --53   FX_NETTING_CUSTOMER
+GENERATE_MT920,         --54   GENERATE_MT920
+GROUP_CODE,         --55   GROUP_CODE
+HO_AC_NO,         --56   HO_AC_NO
+INDIVIDUAL_TAX_CERT_REQD,         --57   INDIVIDUAL_TAX_CERT_REQD
+INTRODUCER,         --58   INTRODUCER
+INVEST_CUST,         --59   INVEST_CUST
+ISSUER_CUSTOMER,         --60   ISSUER_CUSTOMER
+JOINT_VENTURE,         --61   JOINT_VENTURE
+--KYC_DETAILS,         --62   KYC_DETAILS
+KYC_REF_NO,         --63   KYC_REF_NO
+LANGUAGE,         --64   LANGUAGE
+LC_COLLATERAL_PCT,         --65   LC_COLLATERAL_PCT
+LIABILITY_NO,         --66   LIABILITY_NO
+LIAB_BR,         --67   LIAB_BR
+LIAB_NODE,         --68   LIAB_NODE
+LIAB_UNADVISED,         --69   LIAB_UNADVISED
+LIMIT_CCY,         --70   LIMIT_CCY
+LOCAL_BRANCH,         --71   LOCAL_BRANCH
+LOC_CODE,         --72   LOC_CODE
+MAILERS_REQUIRED,         --73   MAILERS_REQUIRED
+MAINTENANCE_SEQ_NO,         --74   MAINTENANCE_SEQ_NO
+MAKER_DT_STAMP,         --75   MAKER_DT_STAMP
+MAKER_ID,         --76   MAKER_ID
+MFI_CUSTOMER,         --77   MFI_CUSTOMER
+NATIONALITY,         --78   NATIONALITY
+OVERALL_LIMIT,         --79   OVERALL_LIMIT
+PAST_DUE_FLAG,         --80   PAST_DUE_FLAG
+PINCODE,         --81   PINCODE
+PRIVATE_CUSTOMER,         --82   PRIVATE_CUSTOMER
+REVISION_DATE,         --83   REVISION_DATE
+RISK_CATEGORY,         --84   RISK_CATEGORY
+RISK_PROFILE,         --85   RISK_PROFILE
+RM_ID,         --86   RM_ID
+RP_CUSTOMER,         --87   RP_CUSTOMER
+SEC_CLEAN_RISK_LIMIT,         --88   SEC_CLEAN_RISK_LIMIT
+SEC_CUST_CLEAN_RISK_LIMIT,         --89   SEC_CUST_CLEAN_RISK_LIMIT
+SEC_CUST_PSTL_RISK_LIMIT,         --90   SEC_CUST_PSTL_RISK_LIMIT
+SEC_PSTL_RISK_LIMIT,         --91   SEC_PSTL_RISK_LIMIT
+SHORT_NAME,         --92   SHORT_NAME
+SHORT_NAME2,         --93   SHORT_NAME2
+SOURCE_CODE,         --94   SOURCE_CODE
+SOURCE_SEQ_NO,         --95   SOURCE_SEQ_NO
+SPECIAL_CUST,         --96   SPECIAL_CUST
+SSN,         --97   SSN
+STAFF,         --98   STAFF
+STMT_DAY,         --99   STMT_DAY
+SWIFT_CODE,         --100   SWIFT_CODE
+TAXID_NO,         --101   TAXID_NO
+TAX_CNTRY,         --102   TAX_CNTRY
+TAX_GROUP,         --103   TAX_GROUP
+TRACK_LIMITS,         --104   TRACK_LIMITS
+TREASURY_CUSTOMER,         --105   TREASURY_CUSTOMER
+UDF_1,         --106   UDF_1
+UDF_2,         --107   UDF_2
+UDF_3,         --108   UDF_3
+UDF_4,         --109   UDF_4
+UDF_5,         --110   UDF_5
+UNIQUE_ID_NAME,         --111   UNIQUE_ID_NAME
+UNIQUE_ID_VALUE,         --112   UNIQUE_ID_VALUE
+UTILITY_PROVIDER,         --113   UTILITY_PROVIDER
+UTILITY_PROVIDER_ID,         --114   UTILITY_PROVIDER_ID
+UTILITY_PROVIDER_TYPE,         --115   UTILITY_PROVIDER_TYPE
+VRTL_CUSTOMER_ID,         --116   VRTL_CUSTOMER_ID
+WHEREABOUTS_UNKNOWN,         --117   WHEREABOUTS_UNKNOWN
+WHT_PCT,         --118   WHT_PCT
+WITHHOLDING_TAX)         --119   WITHHOLDING_TAX
+
+
+values (
+i.ACTION_CODE,         --1   ACTION_CODE
+i.ADDRESS_LINE1,         --2   ADDRESS_LINE1
+i.ADDRESS_LINE2,         --3   ADDRESS_LINE2
+i.ADDRESS_LINE3,         --4   ADDRESS_LINE3
+i.ADDRESS_LINE4,         --5   ADDRESS_LINE4
+i.ALG_ID,         --6   ALG_ID
+i.ALLOW_VRTL_ACCNTS,         --7   ALLOW_VRTL_ACCNTS
+i.AML_CUSTOMER_GRP,         --8   AML_CUSTOMER_GRP
+i.AML_REQUIRED,         --9   AML_REQUIRED
+i.AR_AP_TRACKING,         --10   AR_AP_TRACKING
+i.AUTOGEN_STMTPLAN,         --11   AUTOGEN_STMTPLAN
+i.AUTO_CREATE_ACCOUNT,         --12   AUTO_CREATE_ACCOUNT
+i.AUTO_CUST_AC_NO,         --13   AUTO_CUST_AC_NO
+i.BRANCH_CODE,         --14   BRANCH_CODE
+i.CAS_CUST,         --15   CAS_CUST
+i.CHARGE_GROUP,         --16   CHARGE_GROUP
+sys_date,--i.CHECKER_DT_STAMP,         --17   CHECKER_DT_STAMP
+checker_idd,--i.CHECKER_ID,         --18   CHECKER_ID
+i.CHK_DIGIT_VALID_REQD,         --19   CHK_DIGIT_VALID_REQD
+trim(to_date(substr(i.CIF_CREATION_DATE,1,9), 'DD/MM/RRRR')),       --i.CIF_CREATION_DATE,         --20   CIF_CREATION_DATE                           trim(to_date(CIF_CREATION_DATE, 'DD-MM-RRRR'))  CIF_CREATION_DATE,
+i.CIF_STATUS,         --21   CIF_STATUS
+i.CIF_STATUS_SINCE,         --22   CIF_STATUS_SINCE
+i.CLS_CCY_ALLOWED,         --23   CLS_CCY_ALLOWED
+i.CLS_PARTICIPANT,         --24   CLS_PARTICIPANT
+i.CONSOL_TAX_CERT_REQD,         --25   CONSOL_TAX_CERT_REQD
+i.CONVERSION_STATUS_FLAG,         --26   CONVERSION_STATUS_FLAG
+i.COUNTRY,         --27   COUNTRY
+i.CREDIT_RATING,         --28   CREDIT_RATING
+i.CRM_CUSTOMER,         --29   CRM_CUSTOMER
+i.CRS_TYPE,         --30   CRS_TYPE
+i.CUSTOMER_CATEGORY,         --31   CUSTOMER_CATEGORY
+i.CUSTOMER_NAME1,         --32   CUSTOMER_NAME1
+i.CUSTOMER_NO,         --33   CUSTOMER_NO
+i.CUSTOMER_TYPE,         --34   CUSTOMER_TYPE
+i.CUST_CLASSIFICATION,         --35   CUST_CLASSIFICATION
+i.CUST_CLG_GROUP,         --36   CUST_CLG_GROUP
+i.CUST_UNADVISED,         --37   CUST_UNADVISED
+i.DEBTOR_CATEGORY,         --38   DEBTOR_CATEGORY
+i.DECEASED,         --39   DECEASED
+i.DEFAULT_MEDIA,         --40   DEFAULT_MEDIA
+i.ELCM_CUSTOMER,         --41   ELCM_CUSTOMER
+i.ERR_MSG,         --42   ERR_MSG
+i.EXPOSURE_CATEGORY,         --43   EXPOSURE_CATEGORY
+i.EXPOSURE_COUNTRY,         --44   EXPOSURE_COUNTRY
+i.EXT_REF_NO,         --45   EXT_REF_NO
+i.FAX_NUMBER,         --46   FAX_NUMBER
+i.FREQUENCY,         --47   FREQUENCY
+i.FROZEN,         --48   FROZEN
+i.FT_ACCTING_AS_OF,         --49   FT_ACCTING_AS_OF
+i.FULL_NAME,         --50   FULL_NAME
+i.FX_CLEAN_RISK_LIMIT,         --51   FX_CLEAN_RISK_LIMIT
+i.FX_CUST_CLEAN_RISK_LIMIT,         --52   FX_CUST_CLEAN_RISK_LIMIT
+i.FX_NETTING_CUSTOMER,         --53   FX_NETTING_CUSTOMER
+i.GENERATE_MT920,         --54   GENERATE_MT920
+i.GROUP_CODE,         --55   GROUP_CODE
+i.HO_AC_NO,         --56   HO_AC_NO
+i.INDIVIDUAL_TAX_CERT_REQD,         --57   INDIVIDUAL_TAX_CERT_REQD
+i.INTRODUCER,         --58   INTRODUCER
+i.INVEST_CUST,         --59   INVEST_CUST
+i.ISSUER_CUSTOMER,         --60   ISSUER_CUSTOMER
+i.JOINT_VENTURE,         --61   JOINT_VENTURE
+--i.KYC_DETAILS,         --62   KYC_DETAILS
+i.KYC_REF_NO,         --63   KYC_REF_NO
+i.LANGUAGE,         --64   LANGUAGE
+i.LC_COLLATERAL_PCT,         --65   LC_COLLATERAL_PCT
+i.LIABILITY_NO,         --66   LIABILITY_NO
+i.LIAB_BR,         --67   LIAB_BR
+i.LIAB_NODE,         --68   LIAB_NODE
+i.LIAB_UNADVISED,         --69   LIAB_UNADVISED
+i.LIMIT_CCY,         --70   LIMIT_CCY
+i.LOCAL_BRANCH,         --71   LOCAL_BRANCH
+i.LOC_CODE,         --72   LOC_CODE
+i.MAILERS_REQUIRED,         --73   MAILERS_REQUIRED
+i.MAINTENANCE_SEQ_NO,         --74   MAINTENANCE_SEQ_NO
+sys_date,--i.MAKER_DT_STAMP,         --75   MAKER_DT_STAMP
+maker_idd,--i.MAKER_ID,         --76   MAKER_ID
+i.MFI_CUSTOMER,         --77   MFI_CUSTOMER
+i.NATIONALITY,         --78   NATIONALITY
+i.OVERALL_LIMIT,         --79   OVERALL_LIMIT
+i.PAST_DUE_FLAG,         --80   PAST_DUE_FLAG
+i.PINCODE,         --81   PINCODE
+i.PRIVATE_CUSTOMER,         --82   PRIVATE_CUSTOMER
+i.REVISION_DATE,         --83   REVISION_DATE
+i.RISK_CATEGORY,         --84   RISK_CATEGORY
+i.RISK_PROFILE,         --85   RISK_PROFILE
+i.RM_ID,         --86   RM_ID
+i.RP_CUSTOMER,         --87   RP_CUSTOMER
+i.SEC_CLEAN_RISK_LIMIT,         --88   SEC_CLEAN_RISK_LIMIT
+i.SEC_CUST_CLEAN_RISK_LIMIT,         --89   SEC_CUST_CLEAN_RISK_LIMIT
+i.SEC_CUST_PSTL_RISK_LIMIT,         --90   SEC_CUST_PSTL_RISK_LIMIT
+i.SEC_PSTL_RISK_LIMIT,         --91   SEC_PSTL_RISK_LIMIT
+i.SHORT_NAME,         --92   SHORT_NAME
+i.SHORT_NAME2,         --93   SHORT_NAME2
+i.SOURCE_CODE,         --94   SOURCE_CODE
+i.MAINTENANCE_SEQ_NO,         --95   SOURCE_SEQ_NO
+i.SPECIAL_CUST,         --96   SPECIAL_CUST
+i.SSN,         --97   SSN
+i.STAFF,         --98   STAFF
+i.STMT_DAY,         --99   STMT_DAY
+i.SWIFT_CODE,         --100   SWIFT_CODE
+i.TAXID_NO,         --101   TAXID_NO
+i.TAX_CNTRY,         --102   TAX_CNTRY
+i.TAX_GROUP,         --103   TAX_GROUP
+'Y',         --104   TRACK_LIMITS
+i.TREASURY_CUSTOMER,         --105   TREASURY_CUSTOMER
+i.UDF_1,         --106   UDF_1
+i.UDF_2,         --107   UDF_2
+i.UDF_3,         --108   UDF_3
+i.UDF_4,         --109   UDF_4
+i.UDF_5,         --110   UDF_5
+i.UNIQUE_ID_NAME,         --111   UNIQUE_ID_NAME
+i.UNIQUE_ID_VALUE,         --112   UNIQUE_ID_VALUE
+i.UTILITY_PROVIDER,         --113   UTILITY_PROVIDER
+i.UTILITY_PROVIDER_ID,         --114   UTILITY_PROVIDER_ID
+i.UTILITY_PROVIDER_TYPE,         --115   UTILITY_PROVIDER_TYPE
+i.VRTL_CUSTOMER_ID,         --116   VRTL_CUSTOMER_ID
+i.WHEREABOUTS_UNKNOWN,         --117   WHEREABOUTS_UNKNOWN
+i.WHT_PCT,         --118   WHT_PCT
+i.WITHHOLDING_TAX);        --119   WITHHOLDING_TAX
+
+
+
+commit; 
+
+exception
+when no_data_found then 
+insert into cif_upload_log  values(i.MAINTENANCE_SEQ_NO,'STTM_UPLOAD_CUSTOMER');
+commit;
+
+when others then
+insert into cif_upload_log  values(i.MAINTENANCE_SEQ_NO,'STTM_UPLOAD_CUSTOMER');
+commit;
+
+--select * from cif_upload_log;
+--create table CIF_UPLOAD_LOG(maint_seq_no number, table_name varchar(100));  
+end;
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+end loop;
+
+dbms_output.put_line('---populating sttm_upload_customer : completed');
+
+/*
+select * from cols where table_name = 'STTM_UPLOAD_CUSTOMER' and data_type ='DATE';
+select cif_status_since,maker_dt_stamp,checker_dt_stamp,cif_creation_date,revision_date from sttm_upload_customer;
+select pref_contact_dt,date_of_birth,ppt_iss_date,ppt_exp_date from sttm_upload_cust_personal;
+*/
+
+begin
+---XXX2
+dbms_output.put_line('---populating sttm_upload_cust_personal : starting');
+for i in ( 
+select 
+trim(a.AGE_PROOF_SUBMITTED)  AGE_PROOF_SUBMITTED,         --1   AGE_PROOF_SUBMITTED
+trim(a.BIRTH_COUNTRY)  BIRTH_COUNTRY,         --2   BIRTH_COUNTRY
+trim(a.BRANCH_CODE)  BRANCH_CODE,         --3   BRANCH_CODE
+trim(a.CONVERSION_STATUS_FLAG)  CONVERSION_STATUS_FLAG,         --4   CONVERSION_STATUS_FLAG
+trim(a.CUSTOMER_NO)  CUSTOMER_NO,         --5   CUSTOMER_NO
+trim(a.CUSTOMER_PREFIX)  CUSTOMER_PREFIX,         --6   CUSTOMER_PREFIX
+trim(a.CUSTOMER_PREFIX1)  CUSTOMER_PREFIX1,         --7   CUSTOMER_PREFIX1
+trim(a.CUSTOMER_PREFIX2)  CUSTOMER_PREFIX2,         --8   CUSTOMER_PREFIX2
+trim(a.CUST_COMM_MODE)  CUST_COMM_MODE,         --9   CUST_COMM_MODE
+trim(a.DATE_OF_BIRTH) DATE_OF_BIRTH,         --10   DATE_OF_BIRTH    why ----to_date((substr(date_of_birth,1,4)||'/'||substr(date_of_birth,6,2)||'/'||substr(date_of_birth,10,2)), 'rrrr/mm/dd')  DATE_OF_BIRTH, --
+trim(a.D_ADDRESS1)  D_ADDRESS1,         --11   D_ADDRESS1
+trim(a.D_ADDRESS2)  D_ADDRESS2,         --12   D_ADDRESS2
+trim(a.D_ADDRESS3)  D_ADDRESS3,         --13   D_ADDRESS3
+trim(a.D_ADDRESS4)  D_ADDRESS4,         --14   D_ADDRESS4
+trim(a.D_COUNTRY)  D_COUNTRY,         --15   D_COUNTRY
+trim(a.D_PINCODE)  D_PINCODE,         --16   D_PINCODE
+trim(a.ERR_MSG)  ERR_MSG,         --17   ERR_MSG
+trim(a.E_MAIL)  E_MAIL,         --18   E_MAIL
+trim(a.FAX)  FAX,         --19   FAX
+trim(a.FAX_ISD_NO)  FAX_ISD_NO,         --20   FAX_ISD_NO
+trim(a.FIRST_NAME)  FIRST_NAME,         --21   FIRST_NAME
+trim(a.HOME_TEL_ISD)  HOME_TEL_ISD,         --22   HOME_TEL_ISD
+trim(a.HOME_TEL_NO)  HOME_TEL_NO,         --23   HOME_TEL_NO
+trim(a.LAST_NAME)  LAST_NAME,         --24   LAST_NAME
+trim(a.LEGAL_GUARDIAN)  LEGAL_GUARDIAN,         --25   LEGAL_GUARDIAN
+trim(a.MAINTENANCE_SEQ_NO)  MAINTENANCE_SEQ_NO,         --26   MAINTENANCE_SEQ_NO
+trim(a.MIDDLE_NAME)  MIDDLE_NAME,         --27   MIDDLE_NAME
+trim(a.MINOR)  MINOR,         --28   MINOR
+trim(a.MOBILE_NUMBER)  MOBILE_NUMBER,         --29   MOBILE_NUMBER
+trim(a.MOB_ISD_NO)  MOB_ISD_NO,         --30   MOB_ISD_NO
+trim(a.MOTHER_MAIDEN_NAME)  MOTHER_MAIDEN_NAME,         --31   MOTHER_MAIDEN_NAME
+trim(a.PASSPORT_NO)  PASSPORT_NO,         --32   PASSPORT_NO
+trim(a.PA_HOLDER_ADDR)  PA_HOLDER_ADDR,         --33   PA_HOLDER_ADDR
+trim(a.PA_HOLDER_ADDR_COUNTRY)  PA_HOLDER_ADDR_COUNTRY,         --34   PA_HOLDER_ADDR_COUNTRY
+trim(a.PA_HOLDER_NAME)  PA_HOLDER_NAME,         --35   PA_HOLDER_NAME
+trim(a.PA_HOLDER_NATIONALTY)  PA_HOLDER_NATIONALTY,         --36   PA_HOLDER_NATIONALTY
+trim(a.PA_HOLDER_TEL_ISD)  PA_HOLDER_TEL_ISD,         --37   PA_HOLDER_TEL_ISD
+trim(a.PA_HOLDER_TEL_NO)  PA_HOLDER_TEL_NO,         --38   PA_HOLDER_TEL_NO
+trim(a.PA_ISSUED)  PA_ISSUED,         --39   PA_ISSUED
+trim(a.PLACE_OF_BIRTH)  PLACE_OF_BIRTH,         --40   PLACE_OF_BIRTH
+trim(to_date(trim(a.PPT_EXP_DATE), 'RRRR-MM-DD'))  PPT_EXP_DATE,         --41   PPT_EXP_DATE
+trim(to_date(trim(a.PPT_ISS_DATE), 'RRRR-MM-DD'))  PPT_ISS_DATE,         --42   PPT_ISS_DATE
+null PREF_CONTACT_DT,--trim(to_date(PREF_CONTACT_DT, 'RRRR-MM-DD'))  PREF_CONTACT_DT,         --43   PREF_CONTACT_DT   ---trim(to_date('01-JAN-2000', 'DD-MM-RRRR'))  PREF_CONTACT_DT, 
+null PREF_CONTACT_TIME, ---trim(a.PREF_CONTACT_TIME)  PREF_CONTACT_TIME,         --44   PREF_CONTACT_TIME
+trim(a.P_ADDRESS1)  P_ADDRESS1,         --45   P_ADDRESS1
+trim(a.P_ADDRESS2)  P_ADDRESS2,         --46   P_ADDRESS2
+trim(a.P_ADDRESS3)  P_ADDRESS3,         --47   P_ADDRESS3
+trim(a.P_ADDRESS4)  P_ADDRESS4,         --48   P_ADDRESS4
+trim(a.P_COUNTRY)  P_COUNTRY,         --49   P_COUNTRY
+trim(a.P_NATIONAL_ID)  P_NATIONAL_ID,         --50   P_NATIONAL_ID
+trim(a.P_PINCODE)  P_PINCODE,         --51   P_PINCODE
+trim(a.RESIDENT_STATUS)  RESIDENT_STATUS,         --52   RESIDENT_STATUS
+trim(a.SEX)  SEX,         --53   SEX
+trim(a.SOURCE_CODE)  SOURCE_CODE,         --54   SOURCE_CODE
+trim(a.MAINTENANCE_SEQ_NO)  SOURCE_SEQ_NO,         --55   SOURCE_SEQ_NO
+trim(a.TELEPHONE)  TELEPHONE,         --56   TELEPHONE
+trim(a.TEL_ISD_NO)  TEL_ISD_NO,         --57   TEL_ISD_NO
+trim(a.US_RES_STATUS)  US_RES_STATUS,         --58   US_RES_STATUS
+trim(a.VST_US_PREV)  VST_US_PREV          --59   VST_US_PREV
+from  STTM_UPLOAD_CUST_PERSONAL@to_dtn a,
+sttm_upload_customer b
+where a.maintenance_seq_no = b.maintenance_seq_no)
+loop
+
+begin
+insert into STTM_UPLOAD_CUST_PERSONAL (
+AGE_PROOF_SUBMITTED,         --1   AGE_PROOF_SUBMITTED
+BIRTH_COUNTRY,         --2   BIRTH_COUNTRY
+BRANCH_CODE,         --3   BRANCH_CODE
+CONVERSION_STATUS_FLAG,         --4   CONVERSION_STATUS_FLAG
+CUSTOMER_NO,         --5   CUSTOMER_NO
+CUSTOMER_PREFIX,         --6   CUSTOMER_PREFIX
+CUSTOMER_PREFIX1,         --7   CUSTOMER_PREFIX1
+CUSTOMER_PREFIX2,         --8   CUSTOMER_PREFIX2
+CUST_COMM_MODE,         --9   CUST_COMM_MODE
+DATE_OF_BIRTH,         --10   DATE_OF_BIRTH
+D_ADDRESS1,         --11   D_ADDRESS1
+D_ADDRESS2,         --12   D_ADDRESS2
+D_ADDRESS3,         --13   D_ADDRESS3
+D_ADDRESS4,         --14   D_ADDRESS4
+D_COUNTRY,         --15   D_COUNTRY
+D_PINCODE,         --16   D_PINCODE
+ERR_MSG,         --17   ERR_MSG
+E_MAIL,         --18   E_MAIL
+FAX,         --19   FAX
+FAX_ISD_NO,         --20   FAX_ISD_NO
+FIRST_NAME,         --21   FIRST_NAME
+HOME_TEL_ISD,         --22   HOME_TEL_ISD
+HOME_TEL_NO,         --23   HOME_TEL_NO
+LAST_NAME,         --24   LAST_NAME
+LEGAL_GUARDIAN,         --25   LEGAL_GUARDIAN
+MAINTENANCE_SEQ_NO,         --26   MAINTENANCE_SEQ_NO
+MIDDLE_NAME,         --27   MIDDLE_NAME
+MINOR,         --28   MINOR
+MOBILE_NUMBER,         --29   MOBILE_NUMBER
+MOB_ISD_NO,         --30   MOB_ISD_NO
+MOTHER_MAIDEN_NAME,         --31   MOTHER_MAIDEN_NAME
+PASSPORT_NO,         --32   PASSPORT_NO
+PA_HOLDER_ADDR,         --33   PA_HOLDER_ADDR
+PA_HOLDER_ADDR_COUNTRY,         --34   PA_HOLDER_ADDR_COUNTRY
+PA_HOLDER_NAME,         --35   PA_HOLDER_NAME
+PA_HOLDER_NATIONALTY,         --36   PA_HOLDER_NATIONALTY
+PA_HOLDER_TEL_ISD,         --37   PA_HOLDER_TEL_ISD
+PA_HOLDER_TEL_NO,         --38   PA_HOLDER_TEL_NO
+PA_ISSUED,         --39   PA_ISSUED
+PLACE_OF_BIRTH,         --40   PLACE_OF_BIRTH
+PPT_EXP_DATE,         --41   PPT_EXP_DATE
+PPT_ISS_DATE,         --42   PPT_ISS_DATE
+PREF_CONTACT_DT,         --43   PREF_CONTACT_DT
+PREF_CONTACT_TIME,         --44   PREF_CONTACT_TIME
+P_ADDRESS1,         --45   P_ADDRESS1
+P_ADDRESS2,         --46   P_ADDRESS2
+P_ADDRESS3,         --47   P_ADDRESS3
+P_ADDRESS4,         --48   P_ADDRESS4
+P_COUNTRY,         --49   P_COUNTRY
+P_NATIONAL_ID,         --50   P_NATIONAL_ID
+P_PINCODE,         --51   P_PINCODE
+RESIDENT_STATUS,         --52   RESIDENT_STATUS
+SEX,         --53   SEX
+SOURCE_CODE,         --54   SOURCE_CODE
+SOURCE_SEQ_NO,         --55   SOURCE_SEQ_NO
+TELEPHONE,         --56   TELEPHONE
+TEL_ISD_NO,         --57   TEL_ISD_NO
+US_RES_STATUS,         --58   US_RES_STATUS
+VST_US_PREV)         --59   VST_US_PREV
+
+values (
+i.AGE_PROOF_SUBMITTED,         --1   AGE_PROOF_SUBMITTED
+i.BIRTH_COUNTRY,         --2   BIRTH_COUNTRY
+i.BRANCH_CODE,         --3   BRANCH_CODE
+i.CONVERSION_STATUS_FLAG,         --4   CONVERSION_STATUS_FLAG
+i.CUSTOMER_NO,         --5   CUSTOMER_NO
+i.CUSTOMER_PREFIX,         --6   CUSTOMER_PREFIX
+i.CUSTOMER_PREFIX1,         --7   CUSTOMER_PREFIX1
+i.CUSTOMER_PREFIX2,         --8   CUSTOMER_PREFIX2
+i.CUST_COMM_MODE,         --9   CUST_COMM_MODE
+to_date((substr(i.DATE_OF_BIRTH,1,4)||'/'||substr(i.DATE_OF_BIRTH,6,2)||'/'||substr(i.DATE_OF_BIRTH,9,2)), 'rrrr/mm/dd'),         --10   why DATE_OF_BIRTH
+i.D_ADDRESS1,         --11   D_ADDRESS1
+i.D_ADDRESS2,         --12   D_ADDRESS2
+i.D_ADDRESS3,         --13   D_ADDRESS3
+i.D_ADDRESS4,         --14   D_ADDRESS4
+i.D_COUNTRY,         --15   D_COUNTRY
+i.D_PINCODE,         --16   D_PINCODE
+i.ERR_MSG,         --17   ERR_MSG
+i.E_MAIL,         --18   E_MAIL
+i.FAX,         --19   FAX
+i.FAX_ISD_NO,         --20   FAX_ISD_NO
+i.FIRST_NAME,         --21   FIRST_NAME
+i.HOME_TEL_ISD,         --22   HOME_TEL_ISD
+i.HOME_TEL_NO,         --23   HOME_TEL_NO
+i.LAST_NAME,         --24   LAST_NAME
+i.LEGAL_GUARDIAN,         --25   LEGAL_GUARDIAN
+i.MAINTENANCE_SEQ_NO,         --26   MAINTENANCE_SEQ_NO
+i.MIDDLE_NAME,         --27   MIDDLE_NAME
+i.MINOR,         --28   MINOR
+i.MOBILE_NUMBER,         --29   MOBILE_NUMBER
+i.MOB_ISD_NO,         --30   MOB_ISD_NO
+i.MOTHER_MAIDEN_NAME,         --31   MOTHER_MAIDEN_NAME
+i.PASSPORT_NO,         --32   PASSPORT_NO
+i.PA_HOLDER_ADDR,         --33   PA_HOLDER_ADDR
+i.PA_HOLDER_ADDR_COUNTRY,         --34   PA_HOLDER_ADDR_COUNTRY
+i.PA_HOLDER_NAME,         --35   PA_HOLDER_NAME
+i.PA_HOLDER_NATIONALTY,         --36   PA_HOLDER_NATIONALTY
+i.PA_HOLDER_TEL_ISD,         --37   PA_HOLDER_TEL_ISD
+i.PA_HOLDER_TEL_NO,         --38   PA_HOLDER_TEL_NO
+i.PA_ISSUED,         --39   PA_ISSUED
+i.PLACE_OF_BIRTH,         --40   PLACE_OF_BIRTH
+i.PPT_EXP_DATE,         --41   PPT_EXP_DATE
+i.PPT_ISS_DATE,         --42   PPT_ISS_DATE
+i.PREF_CONTACT_DT,         --43   PREF_CONTACT_DT
+i.PREF_CONTACT_TIME,         --44   PREF_CONTACT_TIME
+i.P_ADDRESS1,         --45   P_ADDRESS1
+i.P_ADDRESS2,         --46   P_ADDRESS2
+i.P_ADDRESS3,         --47   P_ADDRESS3
+i.P_ADDRESS4,         --48   P_ADDRESS4
+i.P_COUNTRY,         --49   P_COUNTRY
+i.P_NATIONAL_ID,         --50   P_NATIONAL_ID
+i.P_PINCODE,         --51   P_PINCODE
+i.RESIDENT_STATUS,         --52   RESIDENT_STATUS
+i.SEX,         --53   SEX
+i.SOURCE_CODE,         --54   SOURCE_CODE
+i.MAINTENANCE_SEQ_NO,         --55   SOURCE_SEQ_NO
+i.TELEPHONE,         --56   TELEPHONE
+i.TEL_ISD_NO,         --57   TEL_ISD_NO
+i.US_RES_STATUS,         --58   US_RES_STATUS
+i.VST_US_PREV);         --59   VST_US_PREV
+
+
+commit; 
+exception
+when no_data_found then 
+insert into cif_upload_log  values(i.MAINTENANCE_SEQ_NO,'STTM_UPLOAD_CUST_PERSONAL');
+commit;
+
+when others then
+insert into cif_upload_log  values(i.MAINTENANCE_SEQ_NO,'STTM_UPLOAD_CUST_PERSONAL');
+commit;
+
+end;
+
+end loop;
+dbms_output.put_line('---populating sttm_upload_cust_personal : completed');
+end;
+
+
+
+
+
+
+begin
+---XXX3
+dbms_output.put_line('---populating sttm_upload_cust_corporate : starting');
+for i in (select 
+trim(a.AMOUNTS_CCY)  AMOUNTS_CCY,         --1   AMOUNTS_CCY
+trim(a.BRANCH_CODE)  BRANCH_CODE,         --2   BRANCH_CODE
+trim(a.BUSINESS_DESCRIPTION)  BUSINESS_DESCRIPTION,         --3   BUSINESS_DESCRIPTION
+trim(a.CAPITAL)  CAPITAL,         --4   CAPITAL
+trim(a.CONVERSION_STATUS_FLAG)  CONVERSION_STATUS_FLAG,         --5   CONVERSION_STATUS_FLAG
+trim(a.CORPORATE_NAME)  CORPORATE_NAME,         --6   CORPORATE_NAME
+trim(a.CUSTOMER_NO)  CUSTOMER_NO,         --7   CUSTOMER_NO
+trim(a.C_NATIONAL_ID)  C_NATIONAL_ID,         --8   C_NATIONAL_ID
+trim(a.ERR_MSG)  ERR_MSG,         --9   ERR_MSG
+trim(a.INCORP_COUNTRY)  INCORP_COUNTRY,         --10   INCORP_COUNTRY
+trim(a.INCORP_DATE)  INCORP_DATE,         --11   INCORP_DATE
+trim(a.MAINTENANCE_SEQ_NO)  MAINTENANCE_SEQ_NO,         --12   MAINTENANCE_SEQ_NO
+trim(a.NETWORTH)  NETWORTH,         --13   NETWORTH
+null OWNERSHIP_TYPE,         --14   OWNERSHIP_TYPE
+null PREF_CONTACT_DT,         --15   PREF_CONTACT_DT
+null PREF_CONTACT_TIME,         --16   PREF_CONTACT_TIME
+trim(a.R_ADDRESS1)  R_ADDRESS1,         --17   R_ADDRESS1
+trim(a.R_ADDRESS2)  R_ADDRESS2,         --18   R_ADDRESS2
+trim(a.R_ADDRESS3)  R_ADDRESS3,         --19   R_ADDRESS3
+trim(a.R_ADDRESS4)  R_ADDRESS4,         --20   R_ADDRESS4
+trim(a.R_COUNTRY)  R_COUNTRY,         --21   R_COUNTRY
+null R_PINCODE,         --22   R_PINCODE
+trim(a.SOURCE_CODE)  SOURCE_CODE,         --23   SOURCE_CODE
+trim(a.MAINTENANCE_SEQ_NO)  SOURCE_SEQ_NO          --24   SOURCE_SEQ_NO
+from  sttm_upload_cust_corporate@to_dtn a,
+sttm_upload_customer b where a.maintenance_seq_no = b.maintenance_seq_no)
+loop
+
+begin
+insert into sttm_upload_cust_corporate (
+AMOUNTS_CCY,         --1   AMOUNTS_CCY
+BRANCH_CODE,         --2   BRANCH_CODE
+BUSINESS_DESCRIPTION,         --3   BUSINESS_DESCRIPTION
+CAPITAL,         --4   CAPITAL
+CONVERSION_STATUS_FLAG,         --5   CONVERSION_STATUS_FLAG
+CORPORATE_NAME,         --6   CORPORATE_NAME
+CUSTOMER_NO,         --7   CUSTOMER_NO
+C_NATIONAL_ID,         --8   C_NATIONAL_ID
+ERR_MSG,         --9   ERR_MSG
+INCORP_COUNTRY,         --10   INCORP_COUNTRY
+INCORP_DATE,         --11   INCORP_DATE
+MAINTENANCE_SEQ_NO,         --12   MAINTENANCE_SEQ_NO
+NETWORTH,         --13   NETWORTH
+OWNERSHIP_TYPE,         --14   OWNERSHIP_TYPE
+PREF_CONTACT_DT,         --15   PREF_CONTACT_DT
+PREF_CONTACT_TIME,         --16   PREF_CONTACT_TIME
+R_ADDRESS1,         --17   R_ADDRESS1
+R_ADDRESS2,         --18   R_ADDRESS2
+R_ADDRESS3,         --19   R_ADDRESS3
+R_ADDRESS4,         --20   R_ADDRESS4
+R_COUNTRY,         --21   R_COUNTRY
+R_PINCODE,         --22   R_PINCODE
+SOURCE_CODE,         --23   SOURCE_CODE
+SOURCE_SEQ_NO)         --24   SOURCE_SEQ_NO
+
+
+
+values (
+i.AMOUNTS_CCY,         --1   AMOUNTS_CCY
+i.BRANCH_CODE,         --2   BRANCH_CODE
+i.BUSINESS_DESCRIPTION,         --3   BUSINESS_DESCRIPTION
+i.CAPITAL,         --4   CAPITAL
+i.CONVERSION_STATUS_FLAG,         --5   CONVERSION_STATUS_FLAG
+i.CORPORATE_NAME,         --6   CORPORATE_NAME
+i.CUSTOMER_NO,         --7   CUSTOMER_NO
+i.C_NATIONAL_ID,         --8   C_NATIONAL_ID
+i.ERR_MSG,         --9   ERR_MSG
+i.INCORP_COUNTRY,         --10   INCORP_COUNTRY
+to_date((substr(i.INCORP_DATE,1,4)||'/'||substr(i.INCORP_DATE,6,2)||'/'||substr(i.INCORP_DATE,9,2)), 'rrrr/mm/dd'), --i.INCORP_DATE,  why       --11   INCORP_DATE
+i.MAINTENANCE_SEQ_NO,         --12   MAINTENANCE_SEQ_NO
+i.NETWORTH,         --13   NETWORTH
+i.OWNERSHIP_TYPE,         --14   OWNERSHIP_TYPE
+i.PREF_CONTACT_DT,         --15   PREF_CONTACT_DT
+i.PREF_CONTACT_TIME,         --16   PREF_CONTACT_TIME
+i.R_ADDRESS1,         --17   R_ADDRESS1
+i.R_ADDRESS2,         --18   R_ADDRESS2
+i.R_ADDRESS3,         --19   R_ADDRESS3
+i.R_ADDRESS4,         --20   R_ADDRESS4
+i.R_COUNTRY,         --21   R_COUNTRY
+i.R_PINCODE,         --22   R_PINCODE
+i.SOURCE_CODE,         --23   SOURCE_CODE
+i.MAINTENANCE_SEQ_NO);         --24   SOURCE_SEQ_NO
+
+commit; 
+exception
+when no_data_found then 
+insert into cif_upload_log  values(i.maintenance_seq_no,'STTM_UPLOAD_CUST_CORPORATE');
+commit;
+
+when others then
+insert into cif_upload_log  values(i.maintenance_seq_no,'STTM_UPLOAD_CUST_CORPORATE');
+commit;
+
+end;
+
+end loop;
+dbms_output.put_line('---populating sttm_upload_cust_corporate : completed');
+end;
+
+
+
+
+
+
+
+
+
+
+begin
+---XXX3
+dbms_output.put_line('---populating sttm_upload_cust_domestic : starting');
+for i in (select 
+trim(a.ACCOMODATION)  ACCOMODATION,         --1   ACCOMODATION
+trim(a.CONVERSION_STATUS_FLAG)  CONVERSION_STATUS_FLAG,         --2   CONVERSION_STATUS_FLAG
+trim(a.CUSTOMER_NO)  CUSTOMER_NO,         --3   CUSTOMER_NO
+trim(a.DEPENDENT_CHILDREN)  DEPENDENT_CHILDREN,         --4   DEPENDENT_CHILDREN
+trim(a.DEPENDENT_OTHERS)  DEPENDENT_OTHERS,         --5   DEPENDENT_OTHERS
+trim(a.EDUCATIONAL_STATUS)  EDUCATIONAL_STATUS,         --6   EDUCATIONAL_STATUS
+trim(a.ERR_MSG)  ERR_MSG,         --7   ERR_MSG
+trim(a.MAINTENANCE_SEQ_NO)  MAINTENANCE_SEQ_NO,         --8   MAINTENANCE_SEQ_NO
+trim(a.MARITAL_STATUS)  MARITAL_STATUS,         --9   MARITAL_STATUS
+trim(a.MOTHER_MAIDEN_NAME)  MOTHER_MAIDEN_NAME,         --10   MOTHER_MAIDEN_NAME
+trim(a.SPOUSE_EMP_STATUS)  SPOUSE_EMP_STATUS,         --11   SPOUSE_EMP_STATUS
+trim(a.SPOUSE_NAME)  SPOUSE_NAME          --12   SPOUSE_NAME
+from  STTM_UPLOAD_CUST_DOMESTIC@to_dtn a,
+sttm_upload_customer b where a.maintenance_seq_no = b.maintenance_seq_no)
+loop
+
+begin
+
+insert into STTM_UPLOAD_CUST_DOMESTIC (
+ACCOMODATION,         --1   ACCOMODATION
+CONVERSION_STATUS_FLAG,         --2   CONVERSION_STATUS_FLAG
+CUSTOMER_NO,         --3   CUSTOMER_NO
+DEPENDENT_CHILDREN,         --4   DEPENDENT_CHILDREN
+DEPENDENT_OTHERS,         --5   DEPENDENT_OTHERS
+EDUCATIONAL_STATUS,         --6   EDUCATIONAL_STATUS
+ERR_MSG,         --7   ERR_MSG
+MAINTENANCE_SEQ_NO,         --8   MAINTENANCE_SEQ_NO
+MARITAL_STATUS,         --9   MARITAL_STATUS
+MOTHER_MAIDEN_NAME,         --10   MOTHER_MAIDEN_NAME
+SPOUSE_EMP_STATUS,         --11   SPOUSE_EMP_STATUS
+SPOUSE_NAME)         --12   SPOUSE_NAME
+
+
+
+values(
+i.ACCOMODATION,         --1   ACCOMODATION
+i.CONVERSION_STATUS_FLAG,         --2   CONVERSION_STATUS_FLAG
+i.CUSTOMER_NO,         --3   CUSTOMER_NO
+i.DEPENDENT_CHILDREN,         --4   DEPENDENT_CHILDREN
+i.DEPENDENT_OTHERS,         --5   DEPENDENT_OTHERS
+i.EDUCATIONAL_STATUS,         --6   EDUCATIONAL_STATUS
+i.ERR_MSG,         --7   ERR_MSG
+i.MAINTENANCE_SEQ_NO,         --8   MAINTENANCE_SEQ_NO
+i.MARITAL_STATUS,         --9   MARITAL_STATUS
+i.MOTHER_MAIDEN_NAME,         --10   MOTHER_MAIDEN_NAME
+i.SPOUSE_EMP_STATUS,         --11   SPOUSE_EMP_STATUS
+i.SPOUSE_NAME) ;        --12   SPOUSE_NAME      --24   SOURCE_SEQ_NO
+
+commit; 
+exception
+when no_data_found then 
+insert into cif_upload_log  values(i.maintenance_seq_no,'STTM_UPLOAD_CUST_DOMESTIC');
+commit;
+
+when others then
+insert into cif_upload_log  values(i.maintenance_seq_no,'STTM_UPLOAD_CUST_DOMESTIC');
+commit;
+
+end;
+
+end loop;
+dbms_output.put_line('---populating sttm_upload_cust_DOMESTIC : completed');
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+begin
+---XXX2
+dbms_output.put_line('---populating sttm_upload_corp_directors : starting');
+for i in ( 
+select 
+trim(a.ADDRESS_LINE1)  ADDRESS_LINE1,         --1   ADDRESS_LINE1
+trim(a.ADDRESS_LINE2)  ADDRESS_LINE2,         --2   ADDRESS_LINE2
+trim(a.ADDRESS_LINE3)  ADDRESS_LINE3,         --3   ADDRESS_LINE3
+trim(a.ADDRESS_LINE4)  ADDRESS_LINE4,         --4   ADDRESS_LINE4
+trim(a.ADDR_COUNTRY)  ADDR_COUNTRY,         --5   ADDR_COUNTRY
+trim(a.BIRTH_COUNTRY)  BIRTH_COUNTRY,         --6   BIRTH_COUNTRY
+trim(a.BRANCH_CODE)  BRANCH_CODE,         --7   BRANCH_CODE
+'U' CONVERSION_STATUS_FLAG,--trim(a.CONVERSION_STATUS_FLAG)  CONVERSION_STATUS_FLAG,         --8   CONVERSION_STATUS_FLAG
+trim(a.CUSTOMER_NO)  CUSTOMER_NO,         --9   CUSTOMER_NO
+trim(a.DATE_OF_BIRTH)  DATE_OF_BIRTH,         --10   DATE_OF_BIRTH
+trim(a.DIRECTOR_NAME)  DIRECTOR_NAME,         --11   DIRECTOR_NAME
+trim(a.ERR_MSG)  ERR_MSG,         --12   ERR_MSG
+trim(a.E_MAIL)  E_MAIL,         --13   E_MAIL
+null  HOME_TEL_ISD,         --14   HOME_TEL_ISD
+null  HOME_TEL_NO,         --15   HOME_TEL_NO
+trim(a.MAINTENANCE_SEQ_NO)  MAINTENANCE_SEQ_NO,         --16   MAINTENANCE_SEQ_NO
+trim(a.MOBILE_NUMBER)  MOBILE_NUMBER,         --17   MOBILE_NUMBER
+trim(a.MOB_ISD_NO)  MOB_ISD_NO,         --18   MOB_ISD_NO
+trim(a.NATIONALITY)  NATIONALITY,         --19   NATIONALITY
+trim(a.OWNERSHIP_TYPE)  OWNERSHIP_TYPE,         --20   OWNERSHIP_TYPE
+trim(a.PCT_HOLDING)  PCT_HOLDING,         --21   PCT_HOLDING
+null  PINCODE,         --22   PINCODE
+trim(a.PLACE_OF_BIRTH)  PLACE_OF_BIRTH,         --23   PLACE_OF_BIRTH
+trim(a.P_ADDRESS1)  P_ADDRESS1,         --24   P_ADDRESS1
+trim(a.P_ADDRESS2)  P_ADDRESS2,         --25   P_ADDRESS2
+trim(a.P_ADDRESS3)  P_ADDRESS3,         --26   P_ADDRESS3
+trim(a.P_ADDRESS4)  P_ADDRESS4,         --27   P_ADDRESS4
+trim(a.P_COUNTRY)  P_COUNTRY,         --28   P_COUNTRY
+null  P_PINCODE,         --29   P_PINCODE
+1 SLNO,  --trim(a.SLNO)  SLNO,         --30   SLNO
+trim(a.SOURCE_CODE)  SOURCE_CODE,         --31   SOURCE_CODE
+trim(a.MAINTENANCE_SEQ_NO)  SOURCE_SEQ_NO,         --32   SOURCE_SEQ_NO
+trim(a.TAX_CNTRY)  TAX_CNTRY,         --33   TAX_CNTRY
+trim(a.TAX_ID)  TAX_ID,         --34   TAX_ID
+trim(a.TELEPHONE)  TELEPHONE,         --35   TELEPHONE
+trim(a.TEL_ISD_NO)  TEL_ISD_NO,         --36   TEL_ISD_NO
+trim(a.US_RES_STATUS)  US_RES_STATUS          --37   US_RES_STATUS
+from  STTM_UPLOAD_CORP_DIRECTORS@to_dtn a,
+sttm_upload_customer b
+where a.maintenance_seq_no = b.maintenance_seq_no)
+loop
+
+begin
+insert into STTM_UPLOAD_CORP_DIRECTORS (
+ADDRESS_LINE1,         --1   ADDRESS_LINE1
+ADDRESS_LINE2,         --2   ADDRESS_LINE2
+ADDRESS_LINE3,         --3   ADDRESS_LINE3
+ADDRESS_LINE4,         --4   ADDRESS_LINE4
+ADDR_COUNTRY,         --5   ADDR_COUNTRY
+BIRTH_COUNTRY,         --6   BIRTH_COUNTRY
+BRANCH_CODE,         --7   BRANCH_CODE
+CONVERSION_STATUS_FLAG,         --8   CONVERSION_STATUS_FLAG
+CUSTOMER_NO,         --9   CUSTOMER_NO
+DATE_OF_BIRTH,         --10   DATE_OF_BIRTH
+DIRECTOR_NAME,         --11   DIRECTOR_NAME
+ERR_MSG,         --12   ERR_MSG
+E_MAIL,         --13   E_MAIL
+HOME_TEL_ISD,         --14   HOME_TEL_ISD
+HOME_TEL_NO,         --15   HOME_TEL_NO
+MAINTENANCE_SEQ_NO,         --16   MAINTENANCE_SEQ_NO
+MOBILE_NUMBER,         --17   MOBILE_NUMBER
+MOB_ISD_NO,         --18   MOB_ISD_NO
+NATIONALITY,         --19   NATIONALITY
+OWNERSHIP_TYPE,         --20   OWNERSHIP_TYPE
+PCT_HOLDING,         --21   PCT_HOLDING
+PINCODE,         --22   PINCODE
+PLACE_OF_BIRTH,         --23   PLACE_OF_BIRTH
+P_ADDRESS1,         --24   P_ADDRESS1
+P_ADDRESS2,         --25   P_ADDRESS2
+P_ADDRESS3,         --26   P_ADDRESS3
+P_ADDRESS4,         --27   P_ADDRESS4
+P_COUNTRY,         --28   P_COUNTRY
+P_PINCODE,         --29   P_PINCODE
+SLNO,         --30   SLNO
+SOURCE_CODE,         --31   SOURCE_CODE
+SOURCE_SEQ_NO,         --32   SOURCE_SEQ_NO
+TAX_CNTRY,         --33   TAX_CNTRY
+TAX_ID,         --34   TAX_ID
+TELEPHONE,         --35   TELEPHONE
+TEL_ISD_NO,         --36   TEL_ISD_NO
+US_RES_STATUS)         --37   US_RES_STATUS
+
+
+
+values (
+i.ADDRESS_LINE1,         --1   ADDRESS_LINE1
+i.ADDRESS_LINE2,         --2   ADDRESS_LINE2
+i.ADDRESS_LINE3,         --3   ADDRESS_LINE3
+i.ADDRESS_LINE4,         --4   ADDRESS_LINE4
+i.ADDR_COUNTRY,         --5   ADDR_COUNTRY
+i.BIRTH_COUNTRY,         --6   BIRTH_COUNTRY
+i.BRANCH_CODE,         --7   BRANCH_CODE
+i.CONVERSION_STATUS_FLAG,         --8   CONVERSION_STATUS_FLAG
+i.CUSTOMER_NO,         --9   CUSTOMER_NO
+i.DATE_OF_BIRTH,         --10   DATE_OF_BIRTH
+i.DIRECTOR_NAME,         --11   DIRECTOR_NAME
+i.ERR_MSG,         --12   ERR_MSG
+i.E_MAIL,         --13   E_MAIL
+i.HOME_TEL_ISD,         --14   HOME_TEL_ISD
+i.HOME_TEL_NO,         --15   HOME_TEL_NO
+i.MAINTENANCE_SEQ_NO,         --16   MAINTENANCE_SEQ_NO
+i.MOBILE_NUMBER,         --17   MOBILE_NUMBER
+i.MOB_ISD_NO,         --18   MOB_ISD_NO
+i.NATIONALITY,         --19   NATIONALITY
+i.OWNERSHIP_TYPE,         --20   OWNERSHIP_TYPE
+i.PCT_HOLDING,         --21   PCT_HOLDING
+i.PINCODE,         --22   PINCODE
+i.PLACE_OF_BIRTH,         --23   PLACE_OF_BIRTH
+i.P_ADDRESS1,         --24   P_ADDRESS1
+i.P_ADDRESS2,         --25   P_ADDRESS2
+i.P_ADDRESS3,         --26   P_ADDRESS3
+i.P_ADDRESS4,         --27   P_ADDRESS4
+i.P_COUNTRY,         --28   P_COUNTRY
+i.P_PINCODE,         --29   P_PINCODE
+i.SLNO,         --30   SLNO
+i.SOURCE_CODE,         --31   SOURCE_CODE
+i.MAINTENANCE_SEQ_NO,         --32   SOURCE_SEQ_NO
+i.TAX_CNTRY,         --33   TAX_CNTRY
+i.TAX_ID,         --34   TAX_ID
+i.TELEPHONE,         --35   TELEPHONE
+i.TEL_ISD_NO,         --36   TEL_ISD_NO
+i.US_RES_STATUS);         --37   US_RES_STATUS
+
+
+commit; 
+exception
+when no_data_found then 
+insert into cif_upload_log  values(i.MAINTENANCE_SEQ_NO,'sttm_upload_corp_directors');
+commit;
+
+when others then
+insert into cif_upload_log  values(i.MAINTENANCE_SEQ_NO,'sttm_upload_corp_directors');
+commit;
+
+end;
+
+end loop;
+dbms_output.put_line('---populating sttm_upload_corp_directors : completed');
+end;
+
+*/
+/*
+--XXXXXXXX
+
+begin
+---XXX2
+dbms_output.put_line('---populating sttm_upload_cust_shareholder : starting');
+for i in ( 
+select 
+trim(a.BRANCH_CODE)  BRANCH_CODE,         --1   BRANCH_CODE
+'U' CONVERSION_STATUS_FLAG,--trim(a.CONVERSION_STATUS_FLAG)  CONVERSION_STATUS_FLAG,         --2   CONVERSION_STATUS_FLAG
+trim(a.CUSTOMER_NO)  CUSTOMER_NO,         --3   CUSTOMER_NO
+trim(a.ERR_MSG)  ERR_MSG,         --4   ERR_MSG
+trim(a.MAINTENANCE_SEQ_NO)  MAINTENANCE_SEQ_NO,         --5   MAINTENANCE_SEQ_NO
+trim(a.PERCENTAGE_HOLDING)  PERCENTAGE_HOLDING,         --6   PERCENTAGE_HOLDING
+trim(a.SHAREHOLDER_ID)  SHAREHOLDER_ID,         --7   SHAREHOLDER_ID
+trim(a.SOURCE_CODE)  SOURCE_CODE,         --8   SOURCE_CODE
+trim(a.MAINTENANCE_SEQ_NO)  SOURCE_SEQ_NO          --9   SOURCE_SEQ_NO
+from  STTM_UPLOAD_CUST_SHAREHOLDER@to_dtn a,
+sttm_upload_customer b
+where a.maintenance_seq_no = b.maintenance_seq_no)
+loop
+
+
+
+
+begin
+insert into sttm_upload_cust_shareholder (
+branch_code,         --1   BRANCH_CODE
+conversion_status_flag,         --2   CONVERSION_STATUS_FLAG
+customer_no,         --3   CUSTOMER_NO
+err_msg,         --4   ERR_MSG
+maintenance_seq_no,         --5   MAINTENANCE_SEQ_NO
+percentage_holding,         --6   PERCENTAGE_HOLDING
+shareholder_id,         --7   SHAREHOLDER_ID
+source_code,         --8   SOURCE_CODE
+source_seq_no)         --9   SOURCE_SEQ_NO
+
+values (
+i.branch_code,         --1   BRANCH_CODE
+i.conversion_status_flag,         --2   CONVERSION_STATUS_FLAG
+i.customer_no,         --3   CUSTOMER_NO
+i.err_msg,         --4   ERR_MSG
+i.maintenance_seq_no,         --5   MAINTENANCE_SEQ_NO
+i.percentage_holding,         --6   PERCENTAGE_HOLDING
+i.shareholder_id,         --7   SHAREHOLDER_ID
+i.source_code,         --8   SOURCE_CODE
+i.source_seq_no);         --9   SOURCE_SEQ_NO
+
+
+commit; 
+exception
+when no_data_found then 
+insert into cif_upload_log  values(i.MAINTENANCE_SEQ_NO,'sttm_upload_cust_shareholder');
+commit;
+
+when others then
+insert into cif_upload_log  values(i.MAINTENANCE_SEQ_NO,'sttm_upload_cust_shareholder');
+commit;
+
+end;
+
+end loop;
+dbms_output.put_line('---populating sttm_upload_cust_shareholder : completed');
+end;
+
+
+*/
+
+
+/*
+
+begin
+---XXX2
+dbms_output.put_line('---populating sttm_upload_corp_directors : starting');
+for i in ( 
+select 
+trim(a.ADDRESS_LINE1)  ADDRESS_LINE1,         --1   ADDRESS_LINE1
+trim(a.ADDRESS_LINE2)  ADDRESS_LINE2,         --2   ADDRESS_LINE2
+trim(a.ADDRESS_LINE3)  ADDRESS_LINE3,         --3   ADDRESS_LINE3
+trim(a.ADDRESS_LINE4)  ADDRESS_LINE4,         --4   ADDRESS_LINE4
+trim(a.ADDR_COUNTRY)  ADDR_COUNTRY,         --5   ADDR_COUNTRY
+trim(a.BIRTH_COUNTRY)  BIRTH_COUNTRY,         --6   BIRTH_COUNTRY
+trim(a.BRANCH_CODE)  BRANCH_CODE,         --7   BRANCH_CODE
+'U' CONVERSION_STATUS_FLAG,--trim(a.CONVERSION_STATUS_FLAG)  CONVERSION_STATUS_FLAG,         --8   CONVERSION_STATUS_FLAG
+trim(a.CUSTOMER_NO)  CUSTOMER_NO,         --9   CUSTOMER_NO
+trim(a.DATE_OF_BIRTH)  DATE_OF_BIRTH,         --10   DATE_OF_BIRTH
+trim(a.DIRECTOR_NAME)  DIRECTOR_NAME,         --11   DIRECTOR_NAME
+trim(a.ERR_MSG)  ERR_MSG,         --12   ERR_MSG
+trim(a.E_MAIL)  E_MAIL,         --13   E_MAIL
+null  HOME_TEL_ISD,         --14   HOME_TEL_ISD
+null  HOME_TEL_NO,         --15   HOME_TEL_NO
+trim(a.MAINTENANCE_SEQ_NO)  MAINTENANCE_SEQ_NO,         --16   MAINTENANCE_SEQ_NO
+trim(a.MOBILE_NUMBER)  MOBILE_NUMBER,         --17   MOBILE_NUMBER
+trim(a.MOB_ISD_NO)  MOB_ISD_NO,         --18   MOB_ISD_NO
+trim(a.NATIONALITY)  NATIONALITY,         --19   NATIONALITY
+trim(a.OWNERSHIP_TYPE)  OWNERSHIP_TYPE,         --20   OWNERSHIP_TYPE
+trim(a.PCT_HOLDING)  PCT_HOLDING,         --21   PCT_HOLDING
+null  PINCODE,         --22   PINCODE
+trim(a.PLACE_OF_BIRTH)  PLACE_OF_BIRTH,         --23   PLACE_OF_BIRTH
+trim(a.P_ADDRESS1)  P_ADDRESS1,         --24   P_ADDRESS1
+trim(a.P_ADDRESS2)  P_ADDRESS2,         --25   P_ADDRESS2
+trim(a.P_ADDRESS3)  P_ADDRESS3,         --26   P_ADDRESS3
+trim(a.P_ADDRESS4)  P_ADDRESS4,         --27   P_ADDRESS4
+trim(a.P_COUNTRY)  P_COUNTRY,         --28   P_COUNTRY
+null  P_PINCODE,         --29   P_PINCODE
+1  SLNO,--trim(a.SLNO)  SLNO,         --30   SLNO
+trim(a.SOURCE_CODE)  SOURCE_CODE,         --31   SOURCE_CODE
+trim(a.SOURCE_SEQ_NO)  SOURCE_SEQ_NO,         --32   SOURCE_SEQ_NO
+trim(a.TAX_CNTRY)  TAX_CNTRY,         --33   TAX_CNTRY
+trim(a.TAX_ID)  TAX_ID,         --34   TAX_ID
+trim(a.TELEPHONE)  TELEPHONE,         --35   TELEPHONE
+trim(a.TEL_ISD_NO)  TEL_ISD_NO,         --36   TEL_ISD_NO
+trim(a.US_RES_STATUS)  US_RES_STATUS          --37   US_RES_STATUS
+from  STTM_UPLOAD_CORP_DIRECTORS@to_dtn a,
+sttm_upload_customer b
+where a.maintenance_seq_no = b.maintenance_seq_no)
+loop
+
+
+begin
+insert into STTM_UPLOAD_CORP_DIRECTORS (
+ADDRESS_LINE1,         --1   ADDRESS_LINE1
+ADDRESS_LINE2,         --2   ADDRESS_LINE2
+ADDRESS_LINE3,         --3   ADDRESS_LINE3
+ADDRESS_LINE4,         --4   ADDRESS_LINE4
+ADDR_COUNTRY,         --5   ADDR_COUNTRY
+BIRTH_COUNTRY,         --6   BIRTH_COUNTRY
+BRANCH_CODE,         --7   BRANCH_CODE
+CONVERSION_STATUS_FLAG,         --8   CONVERSION_STATUS_FLAG
+CUSTOMER_NO,         --9   CUSTOMER_NO
+DATE_OF_BIRTH,         --10   DATE_OF_BIRTH
+DIRECTOR_NAME,         --11   DIRECTOR_NAME
+ERR_MSG,         --12   ERR_MSG
+E_MAIL,         --13   E_MAIL
+HOME_TEL_ISD,         --14   HOME_TEL_ISD
+HOME_TEL_NO,         --15   HOME_TEL_NO
+MAINTENANCE_SEQ_NO,         --16   MAINTENANCE_SEQ_NO
+MOBILE_NUMBER,         --17   MOBILE_NUMBER
+MOB_ISD_NO,         --18   MOB_ISD_NO
+NATIONALITY,         --19   NATIONALITY
+OWNERSHIP_TYPE,         --20   OWNERSHIP_TYPE
+PCT_HOLDING,         --21   PCT_HOLDING
+PINCODE,         --22   PINCODE
+PLACE_OF_BIRTH,         --23   PLACE_OF_BIRTH
+P_ADDRESS1,         --24   P_ADDRESS1
+P_ADDRESS2,         --25   P_ADDRESS2
+P_ADDRESS3,         --26   P_ADDRESS3
+P_ADDRESS4,         --27   P_ADDRESS4
+P_COUNTRY,         --28   P_COUNTRY
+P_PINCODE,         --29   P_PINCODE
+SLNO,         --30   SLNO
+SOURCE_CODE,         --31   SOURCE_CODE
+SOURCE_SEQ_NO,         --32   SOURCE_SEQ_NO
+TAX_CNTRY,         --33   TAX_CNTRY
+TAX_ID,         --34   TAX_ID
+TELEPHONE,         --35   TELEPHONE
+TEL_ISD_NO,         --36   TEL_ISD_NO
+US_RES_STATUS)         --37   US_RES_STATUS
+
+
+
+values (
+i.ADDRESS_LINE1,         --1   ADDRESS_LINE1
+i.ADDRESS_LINE2,         --2   ADDRESS_LINE2
+i.ADDRESS_LINE3,         --3   ADDRESS_LINE3
+i.ADDRESS_LINE4,         --4   ADDRESS_LINE4
+i.ADDR_COUNTRY,         --5   ADDR_COUNTRY
+i.BIRTH_COUNTRY,         --6   BIRTH_COUNTRY
+i.BRANCH_CODE,         --7   BRANCH_CODE
+i.CONVERSION_STATUS_FLAG,         --8   CONVERSION_STATUS_FLAG
+i.CUSTOMER_NO,         --9   CUSTOMER_NO
+i.DATE_OF_BIRTH,         --10   DATE_OF_BIRTH
+i.DIRECTOR_NAME,         --11   DIRECTOR_NAME
+i.ERR_MSG,         --12   ERR_MSG
+i.E_MAIL,         --13   E_MAIL
+i.HOME_TEL_ISD,         --14   HOME_TEL_ISD
+i.HOME_TEL_NO,         --15   HOME_TEL_NO
+i.MAINTENANCE_SEQ_NO,         --16   MAINTENANCE_SEQ_NO
+i.MOBILE_NUMBER,         --17   MOBILE_NUMBER
+i.MOB_ISD_NO,         --18   MOB_ISD_NO
+i.NATIONALITY,         --19   NATIONALITY
+i.OWNERSHIP_TYPE,         --20   OWNERSHIP_TYPE
+i.PCT_HOLDING,         --21   PCT_HOLDING
+i.PINCODE,         --22   PINCODE
+i.PLACE_OF_BIRTH,         --23   PLACE_OF_BIRTH
+i.P_ADDRESS1,         --24   P_ADDRESS1
+i.P_ADDRESS2,         --25   P_ADDRESS2
+i.P_ADDRESS3,         --26   P_ADDRESS3
+i.P_ADDRESS4,         --27   P_ADDRESS4
+i.P_COUNTRY,         --28   P_COUNTRY
+i.P_PINCODE,         --29   P_PINCODE
+i.SLNO,         --30   SLNO
+i.SOURCE_CODE,         --31   SOURCE_CODE
+i.MAINTENANCE_SEQ_NO,         --32   SOURCE_SEQ_NO
+i.TAX_CNTRY,         --33   TAX_CNTRY
+i.TAX_ID,         --34   TAX_ID
+i.TELEPHONE,         --35   TELEPHONE
+i.TEL_ISD_NO,         --36   TEL_ISD_NO
+i.US_RES_STATUS);         --37   US_RES_STATUS
+
+
+commit; 
+exception
+when no_data_found then 
+insert into cif_upload_log  values(i.MAINTENANCE_SEQ_NO,'sttm_upload_corp_directors');
+commit;
+
+when others then
+insert into cif_upload_log  values(i.MAINTENANCE_SEQ_NO,'sttm_upload_corp_directors');
+commit;
+
+end;
+
+end loop;
+dbms_output.put_line('---populating sttm_upload_personal_joint : completed');
+end;
+
+
+
+*/
+
+
+
+
+end;
+
+/*
+truncate table cif_upload_log;
+truncate table  sttb_upload_master;
+truncate table  STTM_UPLOAD_CUSTOMER;
+truncate table  STTM_UPLOAD_CUST_PERSONAL;
+truncate table STTM_UPLOAD_CUST_CORPORATE;
+execute insert_customer_dtn();
+select * from sttm_upload_customer where ext_ref_no in (select a.ext_ref_no from sttm_customer a);
+
+select  * from cif_upload_log;
+select * from sttm_upload_customer;
+select * from STTM_UPLOAD_CUST_PERSONAL;
+select * from STTM_UPLOAD_CUST_CORPORATE;
+select  count(*) from cif_upload_log;
+truncate
+
+select table_name, count(*) from cif_upload_log group by table_name;
+select * from sttm_upload_customer;
+
+
+select distinct table_name from cif_upload_log;
+select maintenance_seq_no,branch_code from  sttm_upload_customer_ft@ampdblink where maintenance_seq_no in (select maint_seq_no from cif_upload_log where table_name = 'STTM_UPLOAD_CUSTOMER'); 
+select maintenance_seq_no,tel_isd_no from  STTM_UPLOAD_CUST_PERSONALTG@AMPDBLINK where maintenance_seq_no in (select maint_seq_no from cif_upload_log where table_name = 'STTM_UPLOAD_CUST_PERSONAL'); 
+select * from STTM_UPLOAD_CUST_CORPORATETG@AMPDBLINK where maintenance_seq_no in (select maint_seq_no from cif_upload_log where table_name = 'STTM_UPLOAD_CUST_CORPORATE');
+
+tel_isd_no
+
+
+select * from STTM_UPLOAD_CUST_PERSONAL;
+
+
+select * from sttm_upload_corp_directors@to_dtn
+
+select maintenance_seq_no, count(*) from sttm_upload_corp_directors@to_dtn group by maintenance_seq_no;
+
+
+-------------------------------------------------
+truncate table  cvtb_upload_master;
+truncate table  sttb_upload_master;
+truncate table  cstb_upload_exception;
+-------------------------------------------------
+truncate table  STTM_UPLOAD_CUSTOMER;
+truncate table  STTM_UPLOAD_CUST_PERSONAL;
+truncate table  STTM_UPLOAD_CUST_PROFESSIONAL;
+truncate table  STTM_UPLOAD_CORP_DIRECTORS;
+truncate table  STTM_UPLOAD_CUST_CORPORATE;
+truncate table  STTM_UPLOAD_CUST_DOMESTIC;
+truncate table  STTM_AUTO_LIAB_UPLOAD;
+-------------------------------------------------
+select * from sttm_trn_code;
+select * from STTM_UPLOAD_CUST_DOMESTIC;
+SELECT * FROM STTM_UPLOAD_CORP_DIRECTORS@to_dtn;
+select * from  sttm_upload_personal_joint@to_dtn where maintenance_seq_no in ('11160285','11144601','11144540','11069680','11069682','11133493','11154990','11137933','11133601','11069684');
+select * from cif_upload_log;
+truncate table cif_upload_log;
+*/
